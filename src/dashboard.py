@@ -35,7 +35,8 @@ from src.visualization import plotly_equity_chart, plotly_price_chart
 # App setup
 # ---------------------------------------------------------------------------
 
-TICKERS = ["SPY", "AAPL", "MSFT", "TSLA", "BTC-USD", "ETH-USD", "GLD", "QQQ"]
+# TICKERS = ["SPY", "AAPL", "MSFT", "TSLA", "BTC-USD", "ETH-USD", "GLD", "QQQ"]
+TICKERS = ["SPY"]
 
 app = dash.Dash(
     __name__,
