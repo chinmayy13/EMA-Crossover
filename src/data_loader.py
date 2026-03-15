@@ -67,64 +67,26 @@ def _is_numeric(value: str) -> bool:
         except Exception:
             return False
 
-def download_data(
-    ticker: str,
-    start: str = "2018-01-01",
-    end: str = None,
-    cache_dir: str = "data",
-) -> pd.DataFrame:
-    """
-    Download OHLCV data for *ticker* from Yahoo Finance and cache to CSV.
-
-    On subsequent calls the cached file is returned immediately, avoiding
-    network round-trips during development or optimisation loops.
-
-    Parameters
-    ----------
-    ticker : str
-        Yahoo Finance ticker symbol, e.g. "SPY", "AAPL", "BTC-USD".
-    start : str
-        Earliest date to fetch (YYYY-MM-DD).
-    end : str or None
-        Latest date to fetch (inclusive).  None -> today.
-    cache_dir : str
-        Directory for cached CSV files.
-
-    Returns
-    -------
-    pd.DataFrame
-        OHLCV DataFrame with a DatetimeIndex.
-    """
-    cache_path = Path(cache_dir) / f"{ticker.replace('-', '_')}.csv"
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-
-    if cache_path.exists():
-        df = _read_cache(cache_path)
-        print(f"[DataLoader] Loaded '{ticker}' from cache ({len(df)} rows)")
-        return df
-
+def download_data(ticker: str, start: str = "2018-01-01"):
     print(f"[DataLoader] Downloading '{ticker}' from Yahoo Finance ...")
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        raw = yf.download(ticker, start=start, end=end, auto_adjust=True, progress=False)
-
-    if raw.empty:
-        raise ValueError(
-            f"[DataLoader] No data returned for '{ticker}'. "
-            "Check the ticker symbol and date range."
+    try:
+        df = yf.download(
+            ticker,
+            start=start,
+            progress=False,
+            auto_adjust=True,
+            threads=False
         )
 
-    # yfinance >= 0.2.x may return a MultiIndex column when downloading a
-    # single ticker with auto_adjust=True -- flatten it if so.
-    if isinstance(raw.columns, pd.MultiIndex):
-        raw.columns = raw.columns.get_level_values(0)
+        if df.empty:
+            raise ValueError("Empty dataframe returned from Yahoo Finance")
 
-    raw.index.name = "Date"
-    raw.to_csv(cache_path)
-    print(f"[DataLoader] Cached to {cache_path} ({len(raw)} rows)")
-    return raw
+        df.reset_index(inplace=True)
+        return df
 
+    except Exception as e:
+        raise RuntimeError(f"Yahoo Finance download failed: {e}")
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     """
