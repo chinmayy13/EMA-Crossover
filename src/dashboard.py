@@ -282,10 +282,9 @@ def run_dashboard(n_clicks, ticker, start_date, short_ema, long_ema):
 # Entry point
 # ---------------------------------------------------------------------------
 
-def run_server(debug: bool = False, port: int = 8050) -> None:
-    """Launch the Dash development server."""
-    print(f"[Dashboard] Starting on http://127.0.0.1:{port}/")
-    app.run(debug=debug, port=port)
+def run_server(debug: bool = False, port: int = int(os.environ.get("PORT", 8050))):
+    print(f"[Dashboard] Starting on port {port}")
+    app.run(debug=debug, port=port, host="0.0.0.0")
 
 
 if __name__ == "__main__":
