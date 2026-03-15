@@ -72,34 +72,16 @@ def download_data(ticker: str, start="2018-01-01"):
 
     cache_file = f"data/{ticker}.csv"
 
-    # Use cached data if available
+    # Always use cached data in production
     if os.path.exists(cache_file):
         print(f"[DataLoader] Loading cached data for {ticker}")
         return pd.read_csv(cache_file)
 
-    print(f"[DataLoader] Downloading '{ticker}' from Yahoo Finance")
-
-    try:
-        df = yf.download(
-            ticker,
-            start=start,
-            progress=False,
-            auto_adjust=True,
-            threads=False
-        )
-
-        if df.empty:
-            raise ValueError("Empty dataframe returned")
-
-        df.reset_index(inplace=True)
-
-        os.makedirs("data", exist_ok=True)
-        df.to_csv(cache_file, index=False)
-
-        return df
-
-    except Exception as e:
-        raise RuntimeError(f"Yahoo download failed: {e}")
+    # If file does not exist, raise clear error
+    raise FileNotFoundError(
+        f"[DataLoader] Cached data file not found: {cache_file}. "
+        "Please add this CSV file to the data folder."
+    )
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     """
