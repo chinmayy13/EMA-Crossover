@@ -70,15 +70,27 @@ def _is_numeric(value: str) -> bool:
 
 def download_data(ticker: str, start="2018-01-01"):
 
-    cache_file = Path("data") / f"{ticker}.csv"
+    cache_file = f"data/{ticker}.csv"
 
-    if cache_file.exists():
+    if os.path.exists(cache_file):
         print(f"[DataLoader] Loading cached data for {ticker}")
-        return pd.read_csv(cache_file, parse_dates=["Date"]).set_index("Date")
+
+        df = pd.read_csv(cache_file)
+
+        # Detect and fix yfinance multiindex format
+        if "Date" not in df.columns:
+            df = pd.read_csv(cache_file, header=[0,1], index_col=0)
+            df.columns = df.columns.get_level_values(0)
+            df.reset_index(inplace=True)
+
+        df["Date"] = pd.to_datetime(df["Date"])
+        df.set_index("Date", inplace=True)
+
+        return df
 
     raise FileNotFoundError(
-        f"[DataLoader] Cached data file not found: {cache_file}. "
-        "Add the CSV file to the data folder."
+        f"Cached data file not found: {cache_file}. "
+        "Please add the CSV file to the data folder."
     )
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
