@@ -165,3 +165,4 @@ yfinance==0.2.40
 scipy==1.13.1
 gunicorn==22.0.0
 matplotlib==3.8.4
+seaborn==0.13.2
