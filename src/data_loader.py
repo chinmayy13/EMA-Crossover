@@ -72,15 +72,13 @@ def download_data(ticker: str, start="2018-01-01"):
 
     cache_file = f"data/{ticker}.csv"
 
-    # Always use cached data in production
     if os.path.exists(cache_file):
         print(f"[DataLoader] Loading cached data for {ticker}")
         return pd.read_csv(cache_file)
 
-    # If file does not exist, raise clear error
     raise FileNotFoundError(
-        f"[DataLoader] Cached data file not found: {cache_file}. "
-        "Please add this CSV file to the data folder."
+        f"Cached data file not found: {cache_file}. "
+        "Please add the CSV file to the data folder."
     )
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
