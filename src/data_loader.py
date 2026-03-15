@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
+import os
 
 
 # ---------------------------------------------------------------------------
@@ -67,8 +68,16 @@ def _is_numeric(value: str) -> bool:
         except Exception:
             return False
 
-def download_data(ticker: str, start: str = "2018-01-01"):
-    print(f"[DataLoader] Downloading '{ticker}' from Yahoo Finance ...")
+def download_data(ticker: str, start="2018-01-01"):
+
+    cache_file = f"data/{ticker}.csv"
+
+    # Use cached data if available
+    if os.path.exists(cache_file):
+        print(f"[DataLoader] Loading cached data for {ticker}")
+        return pd.read_csv(cache_file)
+
+    print(f"[DataLoader] Downloading '{ticker}' from Yahoo Finance")
 
     try:
         df = yf.download(
@@ -80,13 +89,17 @@ def download_data(ticker: str, start: str = "2018-01-01"):
         )
 
         if df.empty:
-            raise ValueError("Empty dataframe returned from Yahoo Finance")
+            raise ValueError("Empty dataframe returned")
 
         df.reset_index(inplace=True)
+
+        os.makedirs("data", exist_ok=True)
+        df.to_csv(cache_file, index=False)
+
         return df
 
     except Exception as e:
-        raise RuntimeError(f"Yahoo Finance download failed: {e}")
+        raise RuntimeError(f"Yahoo download failed: {e}")
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     """
