@@ -70,15 +70,15 @@ def _is_numeric(value: str) -> bool:
 
 def download_data(ticker: str, start="2018-01-01"):
 
-    cache_file = f"data/{ticker}.csv"
+    cache_file = Path("data") / f"{ticker}.csv"
 
-    if os.path.exists(cache_file):
+    if cache_file.exists():
         print(f"[DataLoader] Loading cached data for {ticker}")
-        return pd.read_csv(cache_file)
+        return _read_cache(cache_file)
 
     raise FileNotFoundError(
-        f"Cached data file not found: {cache_file}. "
-        "Please add the CSV file to the data folder."
+        f"[DataLoader] Cached data file not found: {cache_file}. "
+        "Add the CSV file to the data folder."
     )
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
