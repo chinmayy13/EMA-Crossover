@@ -74,7 +74,7 @@ def download_data(ticker: str, start="2018-01-01"):
 
     if cache_file.exists():
         print(f"[DataLoader] Loading cached data for {ticker}")
-        return _read_cache(cache_file)
+        pd.read_csv(cache_file)
 
     raise FileNotFoundError(
         f"[DataLoader] Cached data file not found: {cache_file}. "
